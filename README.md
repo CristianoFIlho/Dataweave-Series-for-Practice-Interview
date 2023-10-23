@@ -2,13 +2,14 @@
 Dataweave Series for Practice &amp; Interview Part-10 - Practice Dataweave here :- Dataweave Playground  Important Note:- First Copy Input, Output, DW Code &amp; Use Json Online Validator, to format the JSON, since medium changes the JSON.
 
 
-
 ```markdown
-## Trim Only the End Spaces, and skip trimming a particular Key
-### Explanation/Logic
-In the following input, skip trimming the 'Code' Key and also trim only the end spaces. In the first object, only Billed and Salary need to be trimmed. In the second object, only Age and Salary need to be trimmed.
+## Trim Only the End Spaces, and Skip Trimming a Particular Key
 
-### Input
+**Explanation/Logic:**
+In the following input, we skip trimming the 'Code' Key and only trim the trailing spaces. In the first object, only 'Billed' and 'Salary' need to be trimmed. In the second object, only 'Age' and 'Salary' need to be trimmed.
+
+**Input:**
+
 ```json
 {
   "Employee": [
@@ -30,7 +31,8 @@ In the following input, skip trimming the 'Code' Key and also trim only the end 
 }
 ```
 
-### Output
+**Output:**
+
 ```json
 {
   "Employee": [
@@ -52,26 +54,27 @@ In the following input, skip trimming the 'Code' Key and also trim only the end 
 }
 ```
 
-### Dataweave Code
+**Dataweave Code:**
+
 ```dw
 %dw 2.0
 output application/json
-fun trimEndSpace(val)= if(val[-1]=="") trimEndSpace(val[0 to -2]) else val
-fun trimAllValues(obj)=
+fun trimEndSpace(val) = if (val[-1] == "") trimEndSpace(val[0 to -2]) else val
+fun trimAllValues(obj) =
   obj mapObject {
-        (if ('$$' == "Code") (($$): $) else ($$): trimEndSpace($))
-      }
+    (if ('$$' == "Code") (($$): $) else ($$): trimEndSpace($))
+  }
 ---
-"Employee": payload.Employee map ((item, index) -> 
- trimAllValues(item)
-)
+"Employee": payload.Employee map ((item, index) -> trimAllValues(item))
 ```
 
-## Print the following Input to Output pattern
-### Explanation/Logic
+## Print the Following Input to Output Pattern
+
+**Explanation/Logic:**
 In the output, the number of "tasks" objects depends on the number of unique Ids in the input. For example, if there are Ids AB, AC, AC, AC, AB, there will be 2 tasks (AB/AC) each for one unique id. The "lineItems" array always contains 2 objects, but the "charges" array objects depend on the number of ABs/ACs in the input.
 
-### Input
+**Input:**
+
 ```json
 {
  "results": [
@@ -94,7 +97,8 @@ In the output, the number of "tasks" objects depends on the number of unique Ids
 }
 ```
 
-### Output
+**Output:**
+
 ```json
 [
   {
@@ -162,34 +166,33 @@ In the output, the number of "tasks" objects depends on the number of unique Ids
 ]
 ```
 
-### Dataweave Code
+**Dataweave Code:**
+
 ```dw
 %dw 2.0
 output application/json
-fun y(val)=payload.results reduce ((item, acc=0) -> if (item.id~=val) acc + 1 else acc)
+fun y(val) = payload.results reduce ((item, acc = 0) -> if (item.id ~= val) acc + 1 else acc)
 ---
-payload.results distinctBy $ map 
-{
-    ($.id):{
-        "lineItems":[
-            {
-                "no":"1",
-                "charges": (0 to y($.id)-1) reduce ((item, acc=[{}]) -> if (item !=4)acc+ {
-                    ($.id):"Delivery"} else acc ) filter $!={}
-                },
-    {
-                "no":"2",
-                "charges": (0 to y($.id)-1) reduce ((item, acc=[{}]) -> if (item !=4)acc+ {
-                    ($.id):"Delivery"} else acc ) filter $!={}
-            }
-        ]
-    }
+payload.results distinctBy $ map {
+  ($.id): {
+    "lineItems": [
+      {
+        "no": "1",
+        "charges": (0 to y($.id) - 1) reduce ((item, acc = [{}]) -> if (item != 4) acc + {($.id): "Delivery"} else acc) filter $!={}
+      },
+      {
+        "no": "2",
+        "charges": (0 to y($.id) - 1) reduce ((item, acc = [{}]) -> if (item != 4) acc + {($.id): "Delivery"} else acc) filter $!={}
+      }
+    ]
+  }
 }
-
 ```
 
-## Keys should come dynamic in response
-### Input
+## Keys Should Come Dynamic in Response
+
+**Input:**
+
 ```json
 [
   {
@@ -207,7 +210,8 @@ payload.results distinctBy $ map
 ]
 ```
 
-### Output
+**Output:**
+
 ```json
 [
   {
@@ -219,7 +223,8 @@ payload.results distinctBy $ map
 ]
 ```
 
-### Dataweave Code
+**Dataweave Code:**
+
 ```dw
 %dw 2.0
 import * from dw::core::Objects
@@ -230,8 +235,10 @@ valueSet(payload groupBy ((item, index) -> item.key1)) map ((group, index1) ->{
 } )
 ```
 
-## Business is parent of industry
-### Input
+## Business is Parent of Industry
+
+**Input:**
+
 ```json
 [
  {
@@ -255,7 +262,8 @@ valueSet(payload groupBy ((item, index) -> item.key1)) map ((group, index1) ->{
 ]
 ```
 
-### Output
+**Output:**
+
 ```json
 {
   "asset": [
@@ -283,10 +291,10 @@ valueSet(payload groupBy ((item, index) -> item.key1)) map ((group, index1) ->{
 }
 ```
 
-### Dataweave Code
+**Dataweave Code:**
+
 ```dw
 %dw 2.0
 output application/json
 var temp={}
-fun rec(value)= value mapObject ((val, key, index) ->if (typeOf(val)~="Object") {"parent":(key) } ++ rec(val) else {(key):(val)})
-var pattern=[rec(payload
+fun rec(value)= value mapObject ((
